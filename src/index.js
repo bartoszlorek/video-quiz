@@ -1,3 +1,5 @@
+import {decodeQuestions} from './questions';
+
 const videoQuizData = {
   '00:00:05': {
     question: 'What is this land?',
@@ -89,3 +91,5 @@ playerElement.ontimeupdate = function () {
     }
   }
 };
+
+console.log(decodeQuestions(__QUESTIONS_DATA__));

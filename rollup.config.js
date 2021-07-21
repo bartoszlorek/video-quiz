@@ -1,8 +1,12 @@
 const {babel} = require('@rollup/plugin-babel');
 const {terser} = require('rollup-plugin-terser');
 const {inline} = require('./rollup.inline');
+const commonjs = require('@rollup/plugin-commonjs');
+const replace = require('@rollup/plugin-replace');
 const cleaner = require('rollup-plugin-cleaner');
 const copy = require('rollup-plugin-copy');
+
+const {encodeQuestions} = require('./src/questions');
 
 export default {
   input: './src/index.js',
@@ -14,6 +18,15 @@ export default {
     cleaner({
       targets: ['./dist'],
     }),
+    replace({
+      preventAssignment: true,
+      values: {
+        __QUESTIONS_DATA__: JSON.stringify(
+          encodeQuestions(require('./src/example.json'))
+        ),
+      },
+    }),
+    commonjs(),
     babel({
       babelHelpers: 'runtime',
       exclude: 'node_modules/**',
