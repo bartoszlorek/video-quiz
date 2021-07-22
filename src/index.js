@@ -1,95 +1,64 @@
-import {decodeQuestions} from './questions';
+import {decodeBase64} from './base64';
+import {createElement, removeAllChildren} from './element';
+import {exitFullscreen, isFullscreen} from './fullscreen';
+import {createTimestampHandler} from './video';
 
-const videoQuizData = {
-  '00:00:05': {
-    question: 'What is this land?',
-    answers: [
-      {text: 'Poland'},
-      {text: 'Ireland'},
-      {text: 'Iceland', correct: true},
-      {text: 'Disneyland'},
-    ],
-  },
-  '00:00:11': {
-    question: 'How many horses do you see?',
-    answers: [
-      {text: 'three'},
-      {text: 'four'},
-      {text: 'five'},
-      {text: 'six', correct: true},
-    ],
-  },
-};
+const videoQuizData = decodeBase64(__QUESTIONS_DATA__);
+const videoElement = document.querySelector('video');
+const overlayElement = document.querySelector('.overlay');
+const wrapperElement = document.querySelector('.wrapper');
 
-var previousTimestamp;
-var overlayElement = document.querySelector('.overlay');
-var playerElement = document.querySelector('.player');
-var questionElement = document.querySelector('.question');
-var answersElement = document.querySelector('.answers');
-var nextElement = document.querySelector('.next');
+videoElement.ontimeupdate = createTimestampHandler(timestamp => {
+  const data = videoQuizData[timestamp];
 
-function displayQuestion(data) {
+  if (data) {
+    if (isFullscreen()) {
+      exitFullscreen();
+    }
+    enterQuestion(data);
+  }
+});
+
+function enterQuestion(data) {
+  wrapperElement.appendChild(
+    createElement('fragment', {
+      children: [
+        createElement('div', {
+          className: 'question',
+          innerText: data.question,
+        }),
+        createElement('div', {
+          className: 'answers',
+          children: data.answers.map(createAnswerElement),
+        }),
+      ],
+    })
+  );
+
   overlayElement.style.display = 'flex';
-  nextElement.style.display = 'none';
-  exitFullScreen();
+  videoElement.pause();
+}
 
-  // fill-in
-  questionElement.innerText = data.question;
-  removeAllChildNodes(answersElement);
+function createAnswerElement({text, correct}) {
+  return createElement('button', {
+    innerText: text,
+    onclick: e => {
+      e.target.classList.add(correct ? 'correct' : 'wrong');
 
-  data.answers.forEach(function (answerData) {
-    var elem = document.createElement('button');
-
-    elem.innerText = answerData.text;
-    elem.onclick = function () {
-      elem.classList.add(answerData.correct ? 'correct' : 'wrong');
-
-      if (answerData.correct) {
-        nextElement.style.display = 'block';
+      if (correct) {
+        wrapperElement.appendChild(
+          createElement('button', {
+            innerText: 'next question',
+            onclick: exitQuestion,
+          })
+        );
       }
-    };
-
-    answersElement.appendChild(elem);
+    },
   });
 }
 
-function exitFullScreen() {
-  if (document.exitFullscreen) {
-    document.exitFullscreen();
-  } else if (document.webkitExitFullscreen) {
-    document.webkitExitFullscreen();
-  } else if (document.mozCancelFullScreen) {
-    document.mozCancelFullScreen();
-  } else if (document.msExitFullscreen) {
-    document.msExitFullscreen();
-  }
-}
-
-function removeAllChildNodes(parent) {
-  while (parent.firstChild) {
-    parent.removeChild(parent.firstChild);
-  }
-}
-
-nextElement.onclick = function () {
+function exitQuestion() {
   overlayElement.style.display = 'none';
-  playerElement.play();
-};
-
-playerElement.ontimeupdate = function () {
-  var timestamp = new Date(playerElement.currentTime * 1000)
-    .toISOString()
-    .substr(11, 8);
-
-  if (previousTimestamp !== timestamp) {
-    previousTimestamp = timestamp;
-
-    var data = videoQuizData[timestamp];
-    if (data) {
-      displayQuestion(data);
-      playerElement.pause();
-    }
-  }
-};
-
-console.log(decodeQuestions(__QUESTIONS_DATA__));
+  removeAllChildren(wrapperElement);
+  videoElement.play();
+}

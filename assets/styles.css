@@ -23,7 +23,7 @@ video {
   flex-direction: column;
 }
 
-.container {
+.wrapper {
   max-width: 75%;
   min-width: 300px;
   display: flex;
@@ -39,14 +39,6 @@ video {
 .answers {
   display: flex;
   flex-direction: column;
-}
-
-.next {
-  display: none;
-}
-
-.small {
-  font-size: 0.75rem;
 }
 
 button {

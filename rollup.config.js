@@ -6,7 +6,7 @@ const replace = require('@rollup/plugin-replace');
 const cleaner = require('rollup-plugin-cleaner');
 const copy = require('rollup-plugin-copy');
 
-const {encodeQuestions} = require('./src/questions');
+const {encodeBase64} = require('./src/base64');
 
 export default {
   input: './src/index.js',
@@ -22,7 +22,7 @@ export default {
       preventAssignment: true,
       values: {
         __QUESTIONS_DATA__: JSON.stringify(
-          encodeQuestions(require('./src/example.json'))
+          encodeBase64(require('./src/example.json'))
         ),
       },
     }),
