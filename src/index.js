@@ -1,7 +1,12 @@
 import {decodeBase64} from './base64';
 import {createElement, removeAllChildren} from './element';
-import {exitFullscreen, isFullscreen} from './fullscreen';
 import {createTimestampHandler} from './video';
+import {
+  isFullscreenEnabled,
+  isFullscreen,
+  exitFullscreen,
+  exitFullscreenFallback,
+} from './fullscreen';
 
 const videoQuizData = decodeBase64(__QUESTIONS_DATA__);
 const videoElement = document.querySelector('video');
@@ -12,10 +17,18 @@ videoElement.ontimeupdate = createTimestampHandler(timestamp => {
   const data = videoQuizData[timestamp];
 
   if (data) {
-    if (isFullscreen()) {
-      exitFullscreen();
+    videoElement.pause();
+
+    if (isFullscreenEnabled()) {
+      if (isFullscreen()) {
+        exitFullscreen();
+      }
+      enterQuestion(data);
+    } else {
+      exitFullscreenFallback(videoElement, () => {
+        enterQuestion(data);
+      });
     }
-    enterQuestion(data);
   }
 });
 
@@ -36,7 +49,6 @@ function enterQuestion(data) {
   );
 
   overlayElement.style.display = 'flex';
-  videoElement.pause();
 }
 
 function createAnswerElement({text, correct}) {

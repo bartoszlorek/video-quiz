@@ -11,7 +11,7 @@ const {encodeBase64} = require('./src/base64');
 export default {
   input: './src/index.js',
   output: {
-    file: './dist/video-quiz.html',
+    file: './dist/index.html',
     format: 'iife',
   },
   plugins: [
