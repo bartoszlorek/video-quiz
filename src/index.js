@@ -18,6 +18,7 @@ videoElement.ontimeupdate = createTimestampHandler(timestamp => {
 
   if (data) {
     videoElement.pause();
+    videoElement.controls = false;
 
     if (isFullscreenEnabled()) {
       if (isFullscreen()) {
@@ -72,5 +73,6 @@ function createAnswerElement({text, correct}) {
 function exitQuestion() {
   overlayElement.style.display = 'none';
   removeAllChildren(wrapperElement);
+  videoElement.controls = true;
   videoElement.play();
 }
