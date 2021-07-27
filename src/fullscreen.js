@@ -1,34 +1,26 @@
-export function isFullscreenEnabled() {
-  const doc = window.document;
-  return !!(
-    doc.fullscreenEnabled ||
-    doc.mozFullscreenEnabled ||
-    doc.webkitFullscreenEnabled ||
-    doc.msFullscreenEnabled
-  );
+export function exitFullscreen(video, callback) {
+  if (isFullscreenEnabled()) {
+    exitFullscreenNative(window.document);
+    exitFullscreenNative(video);
+    callback();
+  } else {
+    exitFullscreenFallback(video, callback);
+  }
 }
 
-export function isFullscreen() {
-  const doc = window.document;
-  return !!(
-    doc.fullscreenElement ||
-    doc.mozFullScreenElement ||
-    doc.webkitFullscreenElement ||
-    doc.msFullscreenElement
-  );
+function exitFullscreenNative(element) {
+  try {
+    (
+      element.exitFullscreen ||
+      element.webkitCancelFullScreen ||
+      element.webkitExitFullscreen ||
+      element.mozCancelFullScreen ||
+      element.msExitFullscreen
+    ).call(element);
+  } catch {}
 }
 
-export function exitFullscreen() {
-  const doc = window.document;
-  (
-    doc.exitFullscreen ||
-    doc.mozCancelFullScreen ||
-    doc.webkitExitFullscreen ||
-    doc.msExitFullscreen
-  ).call(doc);
-}
-
-export function exitFullscreenFallback(video, callback) {
+function exitFullscreenFallback(video, callback) {
   const parent = video.parentElement;
   const sibling = video.nextElementSibling;
 
@@ -40,4 +32,14 @@ export function exitFullscreenFallback(video, callback) {
     parent.insertBefore(video, sibling);
     callback();
   });
+}
+
+function isFullscreenEnabled() {
+  const doc = window.document;
+  return !!(
+    doc.fullscreenEnabled ||
+    doc.mozFullscreenEnabled ||
+    doc.webkitFullscreenEnabled ||
+    doc.msFullscreenEnabled
+  );
 }

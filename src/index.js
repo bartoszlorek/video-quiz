@@ -1,12 +1,7 @@
 import {decodeBase64} from './base64';
 import {createElement, removeAllChildren} from './element';
 import {createTimestampHandler} from './video';
-import {
-  isFullscreenEnabled,
-  isFullscreen,
-  exitFullscreen,
-  exitFullscreenFallback,
-} from './fullscreen';
+import {exitFullscreen} from './fullscreen';
 
 const videoQuizData = decodeBase64(__QUESTIONS_DATA__);
 const videoElement = document.querySelector('video');
@@ -19,17 +14,9 @@ videoElement.ontimeupdate = createTimestampHandler(timestamp => {
   if (data) {
     videoElement.pause();
     videoElement.controls = false;
-
-    if (isFullscreenEnabled()) {
-      if (isFullscreen()) {
-        exitFullscreen();
-      }
+    exitFullscreen(videoElement, () => {
       enterQuestion(data);
-    } else {
-      exitFullscreenFallback(videoElement, () => {
-        enterQuestion(data);
-      });
-    }
+    });
   }
 });
 
