@@ -3,22 +3,22 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const {minify} = require('html-minifier');
 
-function inline({templatePath, stylesPath}) {
-  const templateContent = fs.readFileSync(templatePath, 'utf-8');
-  const stylesContent = fs.readFileSync(stylesPath, 'utf-8');
-
+exports.inline = function (options) {
+  const stylesContent = options.styles.map(readFile).join('');
+  const templateContent = readFile(options.template);
   const template = Handlebars.compile(templateContent, {
     noEscape: true,
   });
 
   return {
-    name: 'inline',
+    name: 'inline-plugin',
     generateBundle(opts, bundle) {
       const scriptName = path.parse(opts.file).base;
       const scriptContent = bundle[scriptName].code;
 
       bundle[scriptName].code = minify(
         template({
+          ...(options.props || {}),
           script: scriptContent,
           style: stylesContent,
         }),
@@ -29,8 +29,8 @@ function inline({templatePath, stylesPath}) {
       );
     },
   };
-}
-
-module.exports = {
-  inline,
 };
+
+function readFile(file) {
+  return fs.readFileSync(file, 'utf-8');
+}

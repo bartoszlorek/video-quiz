@@ -33,8 +33,12 @@ export default {
     }),
     terser(),
     inline({
-      templatePath: './assets/index.hbs',
-      stylesPath: './assets/styles.css',
+      template: './assets/index.hbs',
+      styles: ['./assets/styles.css', './assets/custom.css'],
+      props: {
+        title: 'Video Quiz',
+        videoSrc: './horses.mp4',
+      },
     }),
     copy({
       targets: [{src: './assets/horses.mp4', dest: './dist'}],
